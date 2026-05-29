@@ -45,10 +45,10 @@ Struggles and wrong turns are the most valuable part to record.
 - Make sure the binary still runs
 
 **Acceptance criteria:**
-- [ ] `cmake -S . -B build` configures without errors
-- [ ] `cmake --build build` produces a binary
-- [ ] You can explain what `-S` and `-B` mean
-- [ ] You know what the `build/` directory is and why it should be gitignored
+- [x] `cmake -S . -B build` configures without errors
+- [x] `cmake --build build` produces a binary
+- [x] You can explain what `-S` and `-B` mean
+- [x] You know what the `build/` directory is and why it should be gitignored
 
 **Hints:**
 - Minimum viable `CMakeLists.txt` needs: `cmake_minimum_required`, `project`, `add_executable`
@@ -400,3 +400,51 @@ If I should know `git` and how to pick version deeper I guess.
 
 ---
 
+## Journal — Quest 2: CMake Build System
+
+**Date started: May 20 2026**
+**Date finished: May 20 2026**
+
+**What I did:**
+Here is the commit for this quest "82648c7"
+
+I need to learn what CMake is from "https://cmake.org/cmake/help/latest/guide/tutorial/Before%20You%20Begin.html", CMake is a program that generates build system, build system is then used to create the final output.
+
+I am in Ubuntu so I am using single config. So one dir for one build system for one type (Release or Debug) of output. And I am using Ninja generator. So I have `root/build/debug/` and `root/build/release/`, each hold its dedicated build system and final output.
+
+I first config with the -DCMAKE_BUILD_TYPE=Debug which dictate in config step the type. I am picking Ninja with the `-G` flag during build. `-S` is going to be `.` since I plan to store my CMakeFileLists.txt for this project in the root. And I want the generated build system to be placed in `root/build` so my `-B` is `build`. Which means the dir is one to one with output type.
+
+For now I think I just wanna pin cmake, name project, pin cpp, make my target and set its source property value and make it private too.
+
+Note that the project specify the CXX there this is so that it does not waste time looking for C compiler, this is a C++ project only anyways so this clarifies it at a glance.
+
+```cmake
+cmake_minimum_required(VERSION 3.23)
+project("Sprout Lands" LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_executable(main)
+target_sources(main PRIVATE main.cpp)
+```
+
+Then now I just wanna make the debug setup build system so `cmake -S . -B build/debug -G Ninja -DCMAKE_BUILD_TYPE=Debug`, then use it to create the final output `cmake --build build/debug`. Running the final output works too `./build/debug/main`.
+
+I also add `.gitignore` to `build` dir since we want to track the os agnostic `CMakeLists.txt` file only.
+
+**Errors and wrong turns:**
+No error, I think I understand that for my use case I want `cmake -> Ninja generator -> build system (root/build/debug) -> build -> run it`
+
+**How I solved it:**
+Just read the docs here `https://cmake.org/cmake/help/latest/guide/tutorial/Before%20You%20Begin.html`
+
+**What I learned:**
+I understand that we write text os agnostic file, let cmake create build system out of it for this machine, let cmake use build system to generate final output. There is single and multi config. Single config means I have 1 dir for 1 build system for 1 build type output.
+
+**What felt hard:**
+Nothing was hard.
+
+**Questions I still have:**
+So far everything seems okay.
