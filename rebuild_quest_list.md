@@ -66,11 +66,11 @@ Struggles and wrong turns are the most valuable part to record.
 - Verify the project still builds
 
 **Acceptance criteria:**
-- [ ] `vendored/SDL` exists and contains SDL3 source
-- [ ] `.gitmodules` file is committed
-- [ ] Your executable links against SDL3 (`target_link_libraries`)
-- [ ] A fresh clone with `git clone --recurse-submodules` would work
-- [ ] You can explain what a submodule is and why it's different from copying the files in
+- [x] `vendored/SDL` exists and contains SDL3 source
+- [x] `.gitmodules` file is committed
+- [x] Your executable links against SDL3 (`target_link_libraries`)
+- [x] A fresh clone with `git clone --recurse-submodules` would work
+- [x] You can explain what a submodule is and why it's different from copying the files in
 
 **Hints:**
 - `git submodule add <url> vendored/SDL` then `git submodule update --init`
@@ -448,3 +448,74 @@ Nothing was hard.
 
 **Questions I still have:**
 So far everything seems okay.
+
+---
+
+## Journal — Quest N: [Quest Name]
+
+**Date started: May 31 2026**
+**Date finished: May 31 2026**
+
+**What I did:**
+This is the commit for this quest `6855bc6`
+
+So first I look up the git docs to see if it has a command to make a submodule.
+I am sure the idea is that just like how we can pull remote repo to our local, there must be a means to also pull from remote but as a submodule.
+Where we can control where it is going to be, which pinned snapshot to use, and a pointer that we push to remote.
+
+I find that this is the docs "https://git-scm.com/book/en/v2/Git-Tools-Submodules"
+The docs says the following on how to do it:
+
+`git submodule add <REPOSITORY_URL> <PATH_TO_DIRECTORY>`
+
+Now that I know its possible I need to find the repo URL for the SDL's source repo, and put it in `vendored/SDL`.
+
+I think it is this one! "https://github.com/libsdl-org/SDL.git"
+
+So I am going to run this then I'll go in to pin a certain version which I think should adjust the pointer.
+
+I found that info from this "https://stackoverflow.com/questions/75417355/how-does-one-git-submodule-add-a-specific-commit-and-have-it-be-recorded-in-the"
+
+`git submodule add https://github.com/libsdl-org/SDL.git vendored/SDL`
+
+I notice that after running that as expected I get the whole repo in that dir. And it also made a new file called `.gitmodules` which is the pointer that I wanna track.
+However I do also notice that it tracks this new pulled repo differently as in it tracks its snapshot state.
+
+I think for this project I want to pin it to `release-3.4.8` branch.
+
+`git checkout release-3.4.8`
+
+We pin so that it is a snapshot, anyone who pull gets the same stuff for consistent work!
+
+And I just have to commit, then to pull this properly I have to `git clone --recurse-submodules <my repo with Submodules>`
+
+That way I get my repo and the snapshot submodule repo too.
+
+Then now I have to update my CMakeFileLists.txt so that it tells CMake to also read the submodule CMakeFileLists.txt to make its own targets.
+But then I think I have to make it so that by default it does not build all the targets in the submodule.
+Only the targets that my project rely on gets built. So that `running e.g. make in the parent directory will not build targets in the subdirectory by default`
+
+Here is the docs `https://cmake.org/cmake/help/latest/command/add_subdirectory.html`
+
+After letting CMake reads the submodule CMakeLists.txt I now then need to make sure that when building my project, it also builds the target in SDL that it relies on
+
+`target_link_libraries`
+
+The SDL3::SDL3 is a special target that the docs have that I think has resources on the SDL stuff, I need to make sure that my main have access to it but I use private so that when other refer to my main target indirectly it will not have access to SDL3 resources, only when main is being used directly does it have access to the SDL3 resource.
+The same is said about the main private main.cpp, that means main.cpp resource is only ever available to main target when main target is being used directly.
+
+**Errors and wrong turns:**
+No errors or misunderstandings.
+
+**How I solved it:**
+Was able to bring in submodule and a means to pull the real resource from pointer too, and have cmake read that submodule cmakefileliststxt and also have my project have access to its resources.
+
+**What I learned:**
+That target is referring to a thing that holds resources that compiler uses.
+
+**What felt hard:**
+Nothing yet so far.
+
+**Questions I still have:**
+Do I need to understand more on this or this is good enough for now?
+
